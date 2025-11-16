@@ -8,12 +8,11 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      # Step 1: Checkout the qpdf source code
-      - name: Checkout qpdf source
+      # Step 1: Checkout your own repository (不再 checkout qpdf 仓库)
+      - name: Checkout source code
         uses: actions/checkout@v4
         with:
-          repository: qpdf/qpdf
-          ref: master  # 你也可以使用具体版本号，如 v11.9.1
+          fetch-depth: 0  # 获取整个仓库历史记录，避免问题
 
       # Step 2: Install dependencies using Homebrew
       - name: Install dependencies
