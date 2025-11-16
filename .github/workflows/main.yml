@@ -8,11 +8,15 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout qpdf source
+      - name: Checkout this repo
         uses: actions/checkout@v4
         with:
-          repository: qpdf/qpdf
-          ref: master  # 你也可以写 v11.9.1 等正式版本号
+          fetch-depth: 1
+
+      - name: Clone qpdf source
+        run: |
+          git clone https://github.com/qpdf/qpdf.git
+          cd qpdf
 
       - name: Install dependencies
         run: |
@@ -20,19 +24,12 @@ jobs:
 
       - name: Build qpdf
         run: |
+          cd qpdf
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
           cmake --build build --target qpdf
-
-      - name: Create universal binary (ARM + Intel)
-        run: |
-          mkdir universal
-          lipo -create \
-            build/qpdf \
-            build/qpdf \
-            -output universal/qpdf
 
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
           name: qpdf-macos-universal
-          path: universal/qpdf
+          path: qpdf/build/qpdf
