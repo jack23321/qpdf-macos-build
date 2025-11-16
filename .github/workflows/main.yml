@@ -1,0 +1,38 @@
+name: Build qpdf for macOS (Universal2)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout qpdf source
+        uses: actions/checkout@v4
+        with:
+          repository: qpdf/qpdf
+          ref: master  # 你也可以写 v11.9.1 等正式版本号
+
+      - name: Install dependencies
+        run: |
+          brew install cmake pkg-config zlib libjpeg-turbo
+
+      - name: Build qpdf
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --target qpdf
+
+      - name: Create universal binary (ARM + Intel)
+        run: |
+          mkdir universal
+          lipo -create \
+            build/qpdf \
+            build/qpdf \
+            -output universal/qpdf
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: qpdf-macos-universal
+          path: universal/qpdf
