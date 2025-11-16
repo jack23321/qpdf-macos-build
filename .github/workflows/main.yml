@@ -1,4 +1,4 @@
-name: Build qpdf for macOS (Universal2)
+name: Build qpdf for macOS (Static)
 
 on:
   workflow_dispatch:
@@ -8,28 +8,27 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout this repo
+      # Step 1: Checkout the qpdf source code
+      - name: Checkout qpdf source
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          repository: qpdf/qpdf
+          ref: master  # 你也可以使用具体版本号，如 v11.9.1
 
-      - name: Clone qpdf source
-        run: |
-          git clone https://github.com/qpdf/qpdf.git
-          cd qpdf
-
+      # Step 2: Install dependencies using Homebrew
       - name: Install dependencies
         run: |
           brew install cmake pkg-config zlib libjpeg-turbo
 
-      - name: Build qpdf
+      # Step 3: Build qpdf with static linking (no dynamic libraries)
+      - name: Build qpdf (Static)
         run: |
-          cd qpdf
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF
           cmake --build build --target qpdf
 
-      - name: Upload binary
+      # Step 4: Upload the static binary (qpdf)
+      - name: Upload static binary
         uses: actions/upload-artifact@v4
         with:
-          name: qpdf-macos-universal
-          path: qpdf/build/qpdf
+          name: qpdf-macos-static
+          path: build/qpdf
